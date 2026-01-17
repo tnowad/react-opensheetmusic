@@ -6,8 +6,35 @@ import { OSMDOptions } from '../types';
 
 vi.mock('opensheetmusicdisplay');
 
+// Typed mock definitions to avoid explicit `any` usage
+type MockCursor = {
+  show: ReturnType<typeof vi.fn>;
+  hide: ReturnType<typeof vi.fn>;
+  next: ReturnType<typeof vi.fn>;
+  previous: ReturnType<typeof vi.fn>;
+  nextMeasure: ReturnType<typeof vi.fn>;
+  previousMeasure: ReturnType<typeof vi.fn>;
+  reset: ReturnType<typeof vi.fn>;
+  resetIterator: ReturnType<typeof vi.fn>;
+  update: ReturnType<typeof vi.fn>;
+  Hidden: boolean;
+  SkipInvisibleNotes: boolean;
+};
+
+type MockOSMDInstance = {
+  load: ReturnType<typeof vi.fn>;
+  render: ReturnType<typeof vi.fn>;
+  renderAndScrollBack: ReturnType<typeof vi.fn>;
+  updateGraphic: ReturnType<typeof vi.fn>;
+  clear: ReturnType<typeof vi.fn>;
+  setOptions: ReturnType<typeof vi.fn>;
+  IsReadyToRender: ReturnType<typeof vi.fn>;
+  zoom: number;
+  cursor: MockCursor;
+};
+
 describe('SheetMusic', () => {
-  let mockOSMDInstance: any;
+  let mockOSMDInstance: MockOSMDInstance;
 
   beforeEach(() => {
     mockOSMDInstance = {

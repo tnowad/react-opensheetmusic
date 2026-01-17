@@ -52,7 +52,8 @@ export interface AutoBeamOptions {
   beam_rests?: boolean;
   beam_middle_rests_only?: boolean;
   maintain_stem_directions?: boolean;
-  groups?: number[][];
+  // OSMD expects a tuple-like groups type (e.g. [[3,4],[1,4]]). Allow both tuple and array forms for compatibility.
+  groups?: [number[]] | number[][];
 }
 
 // Complete OSMD Options Interface
@@ -208,5 +209,5 @@ export interface PageFormat {
 // Drawing Parameters Access
 export interface DrawingParameters {
   // Add specific drawing parameters if needed
-  [key: string]: any;
+  [key: string]: unknown;
 }

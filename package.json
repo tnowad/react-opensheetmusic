@@ -6,7 +6,9 @@
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "rollup -c",
@@ -16,7 +18,10 @@
     "test:coverage": "vitest --coverage",
     "lint": "eslint src --ext .ts,.tsx",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "pnpm run lint && pnpm run typecheck && pnpm test -- --run && pnpm run build",
+    "demo:dev": "cd demo && pnpm run dev",
+    "demo:build": "pnpm run build && cd demo && pnpm run build",
+    "demo:preview": "cd demo && pnpm run preview"
   },
   "keywords": [
     "react",
@@ -24,16 +29,26 @@
     "sheet-music",
     "musicxml",
     "osmd",
-    "opensheetmusicdisplay"
+    "opensheetmusicdisplay",
+    "music-notation",
+    "score-renderer",
+    "music-renderer"
   ],
-  "author": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tnowad/react-opensheetmusic.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tnowad/react-opensheetmusic/issues"
+  },
+  "homepage": "https://tnowad.github.io/react-opensheetmusic/",
+  "author": "tnowad",
   "license": "MIT",
   "peerDependencies": {
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0"
   },
   "dependencies": {
-    "@testing-library/jest-dom": "^6.9.1",
     "opensheetmusicdisplay": "^1.9.3"
   },
   "devDependencies": {
@@ -64,5 +79,9 @@
     "typescript": "^5.3.3",
     "vite": "^5.0.8",
     "vitest": "^1.0.4"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "pnpm": ">=8.0.0"
   }
 }

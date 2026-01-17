@@ -31,7 +31,8 @@ export default [
     external: ['react', 'react-dom', 'opensheetmusicdisplay'],
   },
   {
-    input: 'dist/index.d.ts',
+    // Bundle type declarations directly from source to avoid importing the generated bundle
+    input: 'src/index.ts',
     output: [{ file: 'dist/index.d.ts', format: 'es' }],
     plugins: [dts()],
   },

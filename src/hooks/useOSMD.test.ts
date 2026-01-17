@@ -149,11 +149,12 @@ describe('useOSMD', () => {
       const { result } = renderHook(() => useOSMD(containerRef));
 
       let loadingStateChecked = false;
-      let wasLoading = false;
       
       mockOSMDInstance.load.mockImplementation(async () => {
         if (!loadingStateChecked) {
-          wasLoading = result.current.isLoading;
+          // check the loading state once synchronously
+          // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+          result.current.isLoading;
           loadingStateChecked = true;
         }
         return Promise.resolve();

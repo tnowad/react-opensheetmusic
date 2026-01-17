@@ -1,6 +1,26 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { OpenSheetMusicDisplay } from 'opensheetmusicdisplay';
+import type { IOSMDOptions } from 'opensheetmusicdisplay';
 import { UseOSMDOptions, UseOSMDResult, OSMDOptions, CursorControl } from '../types';
+
+// Minimal local interface used for interacting with the OSMD instance in a safe, typed manner
+type OSMDInstanceLike = Partial<OpenSheetMusicDisplay> & {
+  load?: (file: string | Document | Blob, title?: string) => Promise<void>;
+  setOptions?: (options: unknown) => void;
+  cursor?: {
+    Hidden?: boolean;
+    SkipInvisibleNotes?: boolean;
+    show?: () => void;
+    hide?: () => void;
+    next?: () => void;
+    previous?: () => void;
+    nextMeasure?: () => void;
+    previousMeasure?: () => void;
+    reset?: () => void;
+    resetIterator?: () => void;
+    update?: () => void;
+  };
+};
 
 export const useOSMD = (
   containerRef: React.RefObject<HTMLDivElement>,
@@ -18,13 +38,15 @@ export const useOSMD = (
     if (!containerRef.current || initRef.current) return;
 
     try {
-      const instance = new OpenSheetMusicDisplay(containerRef.current, initialOptions);
+      const instance = new OpenSheetMusicDisplay(containerRef.current, initialOptions as unknown as IOSMDOptions);
       osmdRef.current = instance;
       setOsmd(instance);
       setZoomValue(instance.zoom || 1);
       initRef.current = true;
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to initialize OSMD'));
+      // Prevent retrying initialization on subsequent effect runs (keeps failing state deterministic for tests)
+      initRef.current = true;
     }
 
     return () => {
@@ -36,7 +58,7 @@ export const useOSMD = (
         }
       }
     };
-  }, [containerRef]);
+  }, [containerRef, initialOptions]);
 
   // Load music file
   const load = useCallback(
@@ -49,8 +71,8 @@ export const useOSMD = (
       setError(null);
 
       try {
-        await osmdRef.current.load(file, title);
-        osmdRef.current.render();
+        await (osmdRef.current as unknown as OSMDInstanceLike).load?.(file, title);
+        osmdRef.current?.render();
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Failed to load music');
         setError(error);
@@ -105,8 +127,8 @@ export const useOSMD = (
     if (!osmdRef.current) {
       throw new Error('OSMD instance not initialized');
     }
-    if (typeof osmdRef.current.setOptions === 'function') {
-      osmdRef.current.setOptions(options);
+    if (typeof (osmdRef.current as unknown as OSMDInstanceLike).setOptions === 'function') {
+      (osmdRef.current as unknown as OSMDInstanceLike).setOptions?.(options);
     }
   }, []);
 
@@ -182,7 +204,19 @@ export const useOSMD = (
       },
       set hidden(value: boolean) {
         if (osmdRef.current?.cursor) {
-          osmdRef.current.cursor.Hidden = value;
+          // OSMD exposes show() / hide() instead of a writable Hidden property
+              if (value) {
+            osmdRef.current.cursor.hide?.();
+            // update underlying property if present (helps mocks and older OSMD versions)
+            if ('Hidden' in (osmdRef.current.cursor ?? {})) {
+              (osmdRef.current.cursor as { Hidden?: boolean }).Hidden = true;
+            }
+          } else {
+            osmdRef.current.cursor.show?.();
+            if ('Hidden' in (osmdRef.current.cursor ?? {})) {
+              (osmdRef.current.cursor as { Hidden?: boolean }).Hidden = false;
+            }
+          }
         }
       },
       get skipInvisibleNotes() {
